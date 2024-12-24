@@ -8,6 +8,9 @@ fi
 
 echo "Starting setup..."
 
+# Get the non-root username
+NON_ROOT_USER=$(logname)
+
 # Update and upgrade the system
 echo "Updating and upgrading the system..."
 apt update && apt upgrade -y
@@ -45,7 +48,7 @@ else
 fi
 
 # Add the current user to the docker group
-usermod -aG docker $USER
+usermod -aG docker $NON_ROOT_USER
 
 # Apply the new group membership
 newgrp docker
@@ -62,18 +65,19 @@ sudo snap install code --classic
 echo "Installing DBeaver..."
 sudo snap install dbeaver-ce
 
-# Install Oh My Zsh
+# Install Oh My Zsh for the non-root user
 echo "Installing Oh My Zsh..."
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sudo -u $NON_ROOT_USER sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# Install zsh-syntax-highlighting
+# Install zsh-syntax-highlighting for the non-root user
 echo "Installing zsh-syntax-highlighting..."
-ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
+ZSH_CUSTOM="/home/$NON_ROOT_USER/.oh-my-zsh/custom"
+sudo -u $NON_ROOT_USER git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
 
 # Add the plugin to .zshrc if not already added
-if ! grep -q "zsh-syntax-highlighting" ~/.zshrc; then
-  sed -i '/plugins=(/ s/)/ zsh-syntax-highlighting)/' ~/.zshrc
+ZSHRC_PATH="/home/$NON_ROOT_USER/.zshrc"
+if ! grep -q "zsh-syntax-highlighting" $ZSHRC_PATH; then
+  sudo -u $NON_ROOT_USER sed -i '/plugins=(/ s/)/ zsh-syntax-highlighting)/' $ZSHRC_PATH
 fi
 
 # Install OpenVPN3
@@ -89,18 +93,21 @@ read -p "Enter the path to your OpenVPN configuration file (.ovpn): " OVPN_FILE_
 
 # Export the OVPN_FILE_PATH variable and set up aliases
 echo "Setting up OpenVPN aliases..."
-echo "export OVPN_FILE_PATH=${OVPN_FILE_PATH}" >> ~/.zshrc
-echo 'alias vpn-up="vpn-down ; openvpn3 session-start --config $OVPN_FILE_PATH"' >> ~/.zshrc
-echo 'alias vpn-down="openvpn3 session-manage --config $OVPN_FILE_PATH --disconnect"' >> ~/.zshrc
-echo 'alias vpn-status="openvpn3 sessions-list"' >> ~/.zshrc
+echo "export OVPN_FILE_PATH=${OVPN_FILE_PATH}" >> $ZSHRC_PATH
+echo 'alias vpn-up="vpn-down ; openvpn3 session-start --config $OVPN_FILE_PATH"' >> $ZSHRC_PATH
+echo 'alias vpn-down="openvpn3 session-manage --config $OVPN_FILE_PATH --disconnect"' >> $ZSHRC_PATH
+echo 'alias vpn-status="openvpn3 sessions-list"' >> $ZSHRC_PATH
 
 # Copy configuration files
 echo "Copying configuration files..."
-cp shell/.tmux.conf ~/
-cp shell/.zshrc ~/
+cp shell/.tmux.conf "/home/$NON_ROOT_USER/"
+cp shell/.zshrc "/home/$NON_ROOT_USER/"
 
-# Change default shell to Zsh
+# Ensure proper ownership of files for the non-root user
+chown $NON_ROOT_USER:$NON_ROOT_USER "/home/$NON_ROOT_USER/.tmux.conf" "/home/$NON_ROOT_USER/.zshrc"
+
+# Change default shell to Zsh for the non-root user
 echo "Changing default shell to Zsh..."
-chsh -s $(which zsh)
+chsh -s $(which zsh) $NON_ROOT_USER
 
 echo "Setup complete. Please restart your terminal or system for all changes to take effect."
