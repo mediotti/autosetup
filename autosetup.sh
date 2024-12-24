@@ -65,6 +65,9 @@ sudo -u $NON_ROOT_USER git clone https://github.com/zsh-users/zsh-autosuggestion
 echo "Updating .zshrc to include plugins..."
 sudo -u $NON_ROOT_USER sed -i '/^plugins=(/ s/)/ zsh-syntax-highlighting zsh-autosuggestions)/' $ZSHRC_PATH
 
+# Ensure correct path to zsh-syntax-highlighting is sourced in .zshrc
+echo "source $ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> $ZSHRC_PATH
+
 # Step 8: Configure OpenVPN Aliases
 echo "Setting up OpenVPN aliases..."
 read -p "Enter the path to your OpenVPN configuration file (.ovpn): " OVPN_FILE_PATH
