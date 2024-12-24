@@ -9,7 +9,6 @@ fi
 # Variables
 NON_ROOT_USER=$(logname)
 USER_HOME="/home/$NON_ROOT_USER"
-ZSH_CUSTOM="$USER_HOME/.oh-my-zsh/custom"
 ZSHRC_PATH="$USER_HOME/.zshrc"
 
 echo "Starting environment setup..."
@@ -55,18 +54,16 @@ apt install -y openvpn3
 echo "Installing Oh My Zsh for user $NON_ROOT_USER..."
 sudo -u $NON_ROOT_USER sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# Step 7: Install Zsh Plugins (zsh-syntax-highlighting, zsh-autosuggestions)
+# Step 7: Install Zsh Plugins (zsh-syntax-highlighting)
 echo "Installing Zsh plugins..."
-sudo -u $NON_ROOT_USER mkdir -p $ZSH_CUSTOM/plugins
-sudo -u $NON_ROOT_USER git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
-sudo -u $NON_ROOT_USER git clone https://github.com/zsh-users/zsh-autosuggestions.git $ZSH_CUSTOM/plugins/zsh-autosuggestions
 
-# Update .zshrc to include plugins
-echo "Updating .zshrc to include plugins..."
-sudo -u $NON_ROOT_USER sed -i '/^plugins=(/ s/)/ zsh-syntax-highlighting zsh-autosuggestions)/' $ZSHRC_PATH
+# Install zsh-syntax-highlighting using its official instructions
+sudo -u $NON_ROOT_USER git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $USER_HOME/zsh-syntax-highlighting
+sudo -u $NON_ROOT_USER bash -c "echo 'source ${(q-)PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' >> $ZSHRC_PATH"
 
-# Ensure correct path to zsh-syntax-highlighting is sourced in .zshrc
-echo "source $ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> $ZSHRC_PATH
+# Install zsh-autosuggestions
+sudo -u $NON_ROOT_USER git clone https://github.com/zsh-users/zsh-autosuggestions.git $USER_HOME/zsh-autosuggestions
+echo "source $USER_HOME/zsh-autosuggestions/zsh-autosuggestions.zsh" >> $ZSHRC_PATH
 
 # Step 8: Configure OpenVPN Aliases
 echo "Setting up OpenVPN aliases..."
