@@ -75,10 +75,14 @@ ZSH_CUSTOM="/home/$NON_ROOT_USER/.oh-my-zsh/custom"
 sudo -u $NON_ROOT_USER mkdir -p $ZSH_CUSTOM/plugins
 sudo -u $NON_ROOT_USER git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
 
-# Add the plugin to .zshrc if not already added
+# Install zsh-autosuggestions for the non-root user
+echo "Installing zsh-autosuggestions..."
+sudo -u $NON_ROOT_USER git clone https://github.com/zsh-users/zsh-autosuggestions.git $ZSH_CUSTOM/plugins/zsh-autosuggestions
+
+# Add plugins to .zshrc if not already added
 ZSHRC_PATH="/home/$NON_ROOT_USER/.zshrc"
 if ! sudo -u $NON_ROOT_USER grep -q "zsh-syntax-highlighting" $ZSHRC_PATH; then
-  sudo -u $NON_ROOT_USER sed -i '/plugins=(/ s/)/ zsh-syntax-highlighting)/' $ZSHRC_PATH
+  sudo -u $NON_ROOT_USER sed -i '/plugins=(/ s/)/ zsh-syntax-highlighting zsh-autosuggestions)/' $ZSHRC_PATH
 fi
 
 # Install OpenVPN3
