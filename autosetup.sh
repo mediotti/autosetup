@@ -14,30 +14,40 @@ apt update && apt upgrade -y
 
 # Install core tools
 echo "Installing core tools..."
-apt install -y build-essentials curl wget git vim neovim tmux zsh
+apt install -y build-essential curl wget git vim neovim tmux zsh
 
 # Install Docker
 echo "Installing Docker..."
-for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
+for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do 
+  apt-get remove -y $pkg 
+done
 
-sudo apt-get update
-sudo apt-get install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
+apt-get update
+apt-get install -y ca-certificates curl
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
 
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
+apt-get update
 
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-sudo groupadd docker
+# Create the docker group if it doesn't exist
+if ! getent group docker > /dev/null; then
+  echo "Creating 'docker' group..."
+  groupadd docker
+else
+  echo "'docker' group already exists. Skipping group creation."
+fi
 
-sudo usermod -aG docker $USER
+# Add the current user to the docker group
+usermod -aG docker $USER
 
+# Apply the new group membership
 newgrp docker
 
 # Install Postman
