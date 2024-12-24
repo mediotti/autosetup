@@ -52,23 +52,47 @@ newgrp docker
 
 # Install Postman
 echo "Installing Postman..."
-snap install postman
+sudo snap install postman
 
 # Install Visual Studio Code
 echo "Installing Visual Studio Code..."
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/packages.microsoft.gpg
-add-apt-repository "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
-apt update && apt install -y code
+sudo snap install code --classic
 
 # Install DBeaver
 echo "Installing DBeaver..."
-wget -O - https://dbeaver.io/debs/dbeaver.gpg.key | gpg --dearmor -o /usr/share/keyrings/dbeaver-archive-keyring.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/dbeaver-archive-keyring.gpg] https://dbeaver.io/debs/dbeaver-ce $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/dbeaver.list
-apt update && apt install -y dbeaver-ce
+sudo snap install dbeaver-ce
 
 # Install Oh My Zsh
 echo "Installing Oh My Zsh..."
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+# Install zsh-syntax-highlighting
+echo "Installing zsh-syntax-highlighting..."
+ZSH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
+
+# Add the plugin to .zshrc if not already added
+if ! grep -q "zsh-syntax-highlighting" ~/.zshrc; then
+  sed -i '/plugins=(/ s/)/ zsh-syntax-highlighting)/' ~/.zshrc
+fi
+
+# Install OpenVPN3
+echo "Installing OpenVPN3..."
+apt update && apt install -y apt-transport-https
+wget -qO - https://packages.openvpn.net/packages-repo.gpg | gpg --dearmor -o /usr/share/keyrings/openvpn.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/openvpn.asc] https://packages.openvpn.net/openvpn3/debian $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/openvpn3.list
+apt update
+apt install -y openvpn3
+
+# Prompt user for OVPN_FILE_PATH
+read -p "Enter the path to your OpenVPN configuration file (.ovpn): " OVPN_FILE_PATH
+
+# Export the OVPN_FILE_PATH variable and set up aliases
+echo "Setting up OpenVPN aliases..."
+echo "export OVPN_FILE_PATH=${OVPN_FILE_PATH}" >> ~/.zshrc
+echo 'alias vpn-up="vpn-down ; openvpn3 session-start --config $OVPN_FILE_PATH"' >> ~/.zshrc
+echo 'alias vpn-down="openvpn3 session-manage --config $OVPN_FILE_PATH --disconnect"' >> ~/.zshrc
+echo 'alias vpn-status="openvpn3 sessions-list"' >> ~/.zshrc
 
 # Copy configuration files
 echo "Copying configuration files..."

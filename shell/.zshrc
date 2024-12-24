@@ -102,7 +102,7 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-source /home/gabrielmediotti/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source $HOME/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 
 if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
@@ -111,7 +111,7 @@ fi
 
 alias vpn-up="vpn-down ; openvpn3 session-start --config $OVPN_FILE_PATH"                                                                                           
 alias vpn-down="openvpn3 session-manage --config $OVPN_FILE_PATH --disconnect"                                                                                      
-alias vpn-status="openvpn3 sessions-list"                                                                                                                                                                          
+alias vpn-status="openvpn3 sessions-list"                                                                                                                                                                    
 alias git-purge="git branch --v | grep "\[gone\]" | awk '{print $1}' | xargs git branch -D"                                                                                                                        
 alias cpc="xclip -sel c < "
 
