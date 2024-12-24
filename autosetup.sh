@@ -45,10 +45,11 @@ snap install dbeaver-ce
 
 # Step 5: Install OpenVPN3
 echo "Installing OpenVPN3..."
-wget -qO - https://packages.openvpn.net/packages-repo.gpg | gpg --dearmor -o /usr/share/keyrings/openvpn.asc
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/openvpn.asc] https://packages.openvpn.net/openvpn3/debian $(lsb_release -cs) main" > /etc/apt/sources.list.d/openvpn3.list
-apt update
-apt install -y openvpn3
+sudo mkdir -p /etc/apt/keyrings && curl -fsSL https://packages.openvpn.net/packages-repo.gpg | sudo tee /etc/apt/keyrings/openvpn.asc
+DISTRO=$(lsb_release -c -s)
+echo "deb [signed-by=/etc/apt/keyrings/openvpn.asc] https://packages.openvpn.net/openvpn3/debian $DISTRO main" | sudo tee /etc/apt/sources.list.d/openvpn-packages.list
+sudo apt update
+sudo apt install -y openvpn3
 
 # Step 6: Install Oh My Zsh
 echo "Installing Oh My Zsh for user $NON_ROOT_USER..."
